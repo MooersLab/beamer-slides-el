@@ -26,7 +26,7 @@ Use `C-n` repeatedly to navigate downward to the function that you want to selec
 
 ## Alternate approach of loading the package
 Add this function to your `init.el` file to load the file of home-made functions manually.
-Edit the file path to customize to your system:
+Edit the file path to customize for your system:
 ```elisp
 ;;;## beamer-slides-load
 ;; Inspried https://sachachua.com/dotemacs/index.html#org4dd39d0
@@ -65,4 +65,5 @@ Passed 14 tests. Plan to add more advanced functions soon.
 - NIH: R01 AI088011
 - NIH: P30 CA225520 (PI: R. Mannel)
 - NIH: P20 GM103640 and P30 GM145423 (PI: A. West)
+
 

@@ -1,10 +1,10 @@
-;;; beamer-slides.el --- Interactive functions to accelarate the assembly of beamer slideshows  -*- lexical-binding: t; -*-
+;;; beamer-slides.el --- Interactive functions for beamer slideshows -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2025 Blaine Mooers and the University of Oklahoma Board of Regents
 
 ;; Author: blaine-mooers@ou.edu
 ;; Maintainer: blaine-mooers@ou.edu
-;; URL: https://github.com/MooersLab/bemaer-slides-el
+;; URL: https://github.com/MooersLab/beamer-slides-el
 ;; Version: 0.7
 ;; Keywords: latex, beamer slideshows, slide templates
 ;; License: MIT
@@ -13,17 +13,13 @@
 ;;; This package is known to work (insofar as it's tested) with Emacs 30.1.
 
 ;;; Commentary:
+;; This package provides functions to quickly create beamer slides from
+;; org-mode elements like dash lists and tables.
 
 ;;; Code:
 
-
-
-(defun beamer-slides-dash-to-bullet-list-slide()
-  "Convert an 'org-mode' dash list to a complete beamer slide with section.
-This function operates on the selected region, converting org-mode
-dash list items into a complete beamer frame with centered itemized list.
-It prompts for a title to use in both section and frametitle,
-and leaves a prompt inside the note section."
+(defun beamer-slides-dash-to-bullet-list-slide ()
+  "Convert an 'org-mode' dash list to a complete beamer slide with section."
   (interactive)
   (if (not (region-active-p))
       (message "Please select a region with a dash list first")
@@ -49,7 +45,7 @@ and leaves a prompt inside the note section."
         (when (string-match "^\\(\\s-*\\)-\\s-+\\(.*\\)" current-line)
           (let* ((indent (match-string 1 current-line))
                  (item-content (match-string 2 current-line))
-                 (level (/ (length indent) 2))) ;; Assuming 2 spaces per level
+                 (level (/ (length indent) 2)))
 
             ;; Handle level changes
             (cond
@@ -66,7 +62,7 @@ and leaves a prompt inside the note section."
             ;; Add indentation based on current level
             (setq item-list
                   (concat item-list
-                          (make-string (* (+ 1 level) 4) ? ) ;; 4 spaces per level + base indent
+                          (make-string (* (+ 1 level) 4) ? )
                           "\\item "
                           item-content
                           "\n"))
@@ -76,13 +72,12 @@ and leaves a prompt inside the note section."
             (setq current-level level))))
 
       ;; Close any remaining open itemize environments
-      (dotimes (_ (+ 1 current-level))  ;; +1 for the base level
+      (dotimes (_ (+ 1 current-level))
         (if (= _ current-level)
             (setq item-list (concat item-list "\\end{itemize}"))
           (setq item-list (concat item-list "    \\end{itemize}\n"))))
 
       ;; Complete the slide with center environment and frame closing
-      ;; Note contains a prompt for the presenter
       (setq beamer-slide (concat beamer-slide
                                  item-list
                                  "\n\\end{center}\n\\end{frame}"
@@ -92,12 +87,8 @@ and leaves a prompt inside the note section."
       (delete-region (region-beginning) (region-end))
       (insert beamer-slide))))
 
-
 (defun beamer-slides-wrap-image-prefix ()
-  "Wrap the image filename prefix in the current region with a beamer figure slide.
-Takes the selected text as an image file prefix and prompts for a slide title,
-then generates a complete beamer frame with a centered figure and note section.
-Leaves the cursor inside the note section for immediate editing."
+  "Wrap the image filename prefix in the current region with a beamer figure slide."
   (interactive)
   (if (not (region-active-p))
       (message "Please select a region containing an image file prefix first")
@@ -120,15 +111,10 @@ Leaves the cursor inside the note section for immediate editing."
   
       ;; Move cursor to the note section for immediate editing
       (search-backward "Add speaker notes here")
-      (beginning-of-line)))))
-
+      (beginning-of-line))))
 
 (defun beamer-slides-org-table-to-beamer-slide ()
-  "Convert an org-mode table to a LaTeX table in a beamer slide.
-This function operates on the selected region containing an org-mode table,
-converts it to a LaTeX table, and wraps it in a beamer slide with section.
-The leftmost column will be left-aligned, while other columns remain centered.
-Prompts for slide title to use in both section and frametitle."
+  "Convert an org-mode table to a LaTeX table in a beamer slide."
   (interactive)
   (if (not (region-active-p))
       (message "Please select a region with an org-mode table first")
@@ -161,9 +147,9 @@ Prompts for slide title to use in both section and frametitle."
             (setq column-count (- (length (split-string content-line "|" t)) 0)))))
 
       ;; Add column specifiers - leftmost is 'l', others are 'c'
-      (setq latex-table (concat latex-table "l")) ;; First column left-aligned
+      (setq latex-table (concat latex-table "l"))
       (dotimes (_ (1- column-count))
-        (setq latex-table (concat latex-table "c"))) ;; Remaining columns centered
+        (setq latex-table (concat latex-table "c")))
       (setq latex-table (concat latex-table "}\n    \\toprule\n"))
 
       ;; Process table rows
@@ -216,11 +202,8 @@ Prompts for slide title to use in both section and frametitle."
       (delete-region (region-beginning) (region-end))
       (insert beamer-slide))))
 
-
 (defun beamer-slides-acknowledgements-slide ()
-  "Insert a beamer slide for acknowledgements with the standard format.
-Creates a section, frame, and formatted itemized lists for people
-and funding sources."
+  "Insert a beamer slide for acknowledgements with the standard format."
   (interactive)
   (let ((beamer-slide "\\section{Acknowledgements}
 \\begin{frame}
@@ -243,14 +226,10 @@ Funding:
 \\note{
   Add speaker notes here for acknowledgements...
 }"))
-
-    ;; Insert the beamer slide at current point
     (insert beamer-slide)))
 
-
 (defun beamer-slides-title-slide ()
-  "Insert a beamer title slide with the standard format.
-Prompts for the title of the talk and the venue/date information."
+  "Insert a beamer title slide with the standard format."
   (interactive)
   (let* ((talk-title (read-string "Title of the talk: "))
          (venue-info (read-string "Venue and date (e.g., 'SSRL/LCLS User Meeting\\\\ 25 September 2025'): "))
@@ -273,7 +252,7 @@ Prompts for the title of the talk and the venue/date information."
 Hi, I am Blaine Mooers.
 I will be talking about
 I am an associate professor of Biochemistry and Molecular Biology at the University of Oklahoma Health Sciences Center in Oklahoma City.
-}" talk-title venue-info))
+}" talk-title venue-info)))
 
     ;; Insert the beamer slide at current point
     (insert beamer-slide)
@@ -281,13 +260,10 @@ I am an associate professor of Biochemistry and Molecular Biology at the Univers
     ;; Move cursor to the end of the first note section
     (search-backward "} } }")
     (search-backward "\\note{")
-    (forward-char 7))) ;; Position cursor after "\\note{" for easy editing
-
+    (forward-char 7)))
 
 (defun beamer-slides-code-block-slide ()
-  "Insert a beamer slide with a code block using the standard format.
-Prompts for the title of the slide, which is also used for the section.
-Positions cursor in the code block for immediate editing."
+  "Insert a beamer slide with a code block using the standard format."
   (interactive)
   (let* ((slide-title (read-string "Title of the slide: "))
          (beamer-slide (format "%%%%%%%%%%%%%%%%%%%% slide No. %%%%%%%%%%%%%%%%%%%%
@@ -314,13 +290,10 @@ Positions cursor in the code block for immediate editing."
     ;; Move cursor to the code block for immediate editing
     (search-backward "Insert code here indented by four spaces")
     (replace-match "")
-    (forward-char 4))) ;; Position cursor after indentation
-
+    (forward-char 4)))
 
 (defun beamer-slides-beamer-aligned-equations-slide ()
-  "Insert a beamer slide with aligned equations using the standard format.
-Prompts for the title of the slide, which is also used for the section.
-Positions cursor in the equation block for immediate editing."
+  "Insert a beamer slide with aligned equations using the standard format."
   (interactive)
   (let* ((slide-title (read-string "Title of the slide: "))
          (beamer-slide (format "\\section{%s}
@@ -352,11 +325,8 @@ y_{i} & \\sim \\operatorname{Normal}\\left(\\mu_{i}, \\sigma\\right) \\\\
     (forward-line 1)
     (beginning-of-line)))
 
-
 (defun beamer-slides-beamer-video-slide ()
-  "Insert a beamer slide with a video element using the standard format.
-Prompts for the title of the slide, image file prefix, and video path.
-Uses the title for both section and frametitle."
+  "Insert a beamer slide with a video element using the standard format."
   (interactive)
   (let* ((slide-title (read-string "Title of the slide: "))
          (image-prefix (read-string "Image file prefix (without path/extension): "))
@@ -377,14 +347,10 @@ Uses the title for both section and frametitle."
 
     ;; Move cursor to the note section for immediate editing
     (search-backward "Add speaker notes here")
-        (beginning-of-line)))
-
+    (beginning-of-line)))
 
 (defun beamer-slides-beamer-two-columns-dashed-lists-slide ()
-  "Convert two org-mode dashed lists to a two-column beamer slide.
-Takes two selected regions with org-mode dash lists and converts them
-to a two-column beamer slide with itemized lists.
-Prompts for the slide title and optional footnote text."
+  "Convert two org-mode dashed lists to a two-column beamer slide."
   (interactive)
   (if (not (region-active-p))
       (message "Please select a region with two dash lists separated by a blank line")
@@ -396,57 +362,53 @@ Prompts for the slide title and optional footnote text."
            (right-list-text (if (>= (length lists) 2) (nth 1 lists) ""))
            (left-items "")
            (right-items "")
-           (beamer-slide-template "\\section{%s}
-\\begin{frame}
-\\frametitle{%s}
-\\begin{large}
-\\begin{columns}
-    \\begin{column}{0.45\\textwidth}
-        \\begin{itemize}[font=$\\bullet$\\scshape\\bfseries]
-%s
-        \\end{itemize}
-    \\end{column}
-    \\begin{column}{0.45\\textwidth}
-        \\begin{itemize}[font=$\\bullet$\\scshape\\bfseries]
-%s
-        \\end{itemize}
-    \\end{column}
-    \\end{columns}
-\\end{large}
-    \\vspace{2em}
-  %s
-\\end{frame}
-\\note{
-  Add speaker notes here for %s...
-}"))
-;; Process left column list
-(dolist (line (split-string left-list-text "\n" t))
-  (when (string-match "^\\s-*-\\s-+\\(.*\\)" line)
-    (let ((item-content (match-string 1 line)))
-      (setq left-items (concat left-items "            \\item " item-content "\n")))))
-
-;; Process right column list
-(dolist (line (split-string right-list-text "\n" t))
-  (when (string-match "^\\s-*-\\s-+\\(.*\\)" line)
-    (let ((item-content (match-string 1 line)))
-      (setq right-items (concat right-items "            \\item " item-content "\n")))))
-
-;; Format the slide
-(let ((beamer-slide (format beamer-slide-template
-                            slide-title
-                            slide-title
-                            left-items
-                            right-items
-                            (or footnote-text "")
-                            slide-title)))
-
-  ;; Replace the region with the new beamer slide
-  (delete-region (region-beginning) (region-end))
-  (insert beamer-slide)
-
-  ;; Move cursor to the note section
-  (search-backward "Add speaker notes here")
-    (beginning-of-line)))))
+           (beamer-slide ""))
+      
+      ;; Process left column list
+      (dolist (line (split-string left-list-text "\n" t))
+        (when (string-match "^\\s-*-\\s-+\\(.*\\)" line)
+          (let ((item-content (match-string 1 line)))
+            (setq left-items (concat left-items "            \\item " item-content "\n")))))
+      
+      ;; Process right column list
+      (dolist (line (split-string right-list-text "\n" t))
+        (when (string-match "^\\s-*-\\s-+\\(.*\\)" line)
+          (let ((item-content (match-string 1 line)))
+            (setq right-items (concat right-items "            \\item " item-content "\n")))))
+      
+      ;; Create the slide template
+      (setq beamer-slide (concat "\\section{" slide-title "}\n"
+                               "\\begin{frame}\n"
+                               "\\frametitle{" slide-title "}\n"
+                               "\\begin{large}\n"
+                               "\\begin{columns}\n"
+                               "    \\begin{column}{0.45\\textwidth}\n"
+                               "        \\begin{itemize}[font=$\\bullet$\\scshape\\bfseries]\n"
+                               left-items
+                               "        \\end{itemize}\n"
+                               "    \\end{column}\n"
+                               "    \\begin{column}{0.45\\textwidth}\n"
+                               "        \\begin{itemize}[font=$\\bullet$\\scshape\\bfseries]\n"
+                               right-items
+                               "        \\end{itemize}\n"
+                               "    \\end{column}\n"
+                               "    \\end{columns}\n"
+                               "\\end{large}\n"
+                               "    \\vspace{2em}\n"
+                               "  " (or footnote-text "") "\n"
+                               "\\end{frame}\n"
+                               "\\note{\n"
+                               "  Add speaker notes here for " slide-title "...\n"
+                               "  }\n"))
+      
+      ;; Replace the region with the new beamer slide
+      (delete-region (region-beginning) (region-end))
+      (insert beamer-slide)
+      
+      ;; Move cursor to the note section
+      (search-backward "Add speaker notes here")
+      (beginning-of-line))))
 
 (provide 'beamer-slides)
 ;;; beamer-slides.el ends here
+

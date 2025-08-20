@@ -1,4 +1,4 @@
-![Version](https://img.shields.io/static/v1?label=beamer-slides-el&message=0.7&color=brightcolor)
+![Version](https://img.shields.io/static/v1?label=beamer-slides-el&message=0.1&color=brightcolor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 # Library of elisp functions for creating Beamer slides inside Emacs
 
@@ -65,5 +65,6 @@ Passed 14 tests. Plan to add more advanced functions soon.
 - NIH: R01 AI088011
 - NIH: P30 CA225520 (PI: R. Mannel)
 - NIH: P20 GM103640 and P30 GM145423 (PI: A. West)
+
 
 

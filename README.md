@@ -7,6 +7,13 @@ You are promoted to add the title of the slide, which is also used for the secti
 The prompt is left in the notes section to promote recording some metadata about the slide.
 Some functions wrap the slide around an org-mode list or the name of a figure.
 
+## Features:
+
+- Converting org-mode elements like dash lists and tables to Beamer format
+- Creating specialized slides (title, acknowledgements, equations, code blocks, etc.)
+- Working with multimedia elements like images and videos
+- Supporting two-column layouts
+
 ## Installation with use-package and straight
 Add this to your `init.el` file and reload Emacs or evaluate in the scratch buffer.
 Straight will `git clone` this repo and store it in the `repos` subfolder of your `.emacs.d` folder.

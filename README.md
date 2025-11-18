@@ -3,9 +3,12 @@
 # Library of elisp functions for creating Beamer slides inside Emacs
 
 This is a library of custom functions designed to accelerate the slide-by-slide assembly of a beamer presentation for scientific talks.
-You are promoted to add the title of the slide, which is also used for the section title.
-The prompt is left in the notes section to promote recording some metadata about the slide.
-Some functions wrap the slide around an org-mode list or the name of a figure.
+Beamer is a LaTeX package that supports the assembly of slideshows and the making of posters.
+
+You are prompted to add the title of the slide, which is also used for the section title.
+The mouse cursor lands in the notes section to encourage recording some metadata about the slide.
+Some functions wrap the slide around an org-mode list (which will be converted to LaTeX) or the name of a figure to automate the assembly of list and image slides.
+These functions replace the reuse of existing slides as templates to avoid introducing bugs.
 
 ## Installation with use-package and straight
 Add this to your `init.el` file and reload Emacs or evaluate in the scratch buffer.
@@ -55,7 +58,8 @@ Enter `M-x beamer-slides-load` to load the functions.
 | `beamer-slides-beamer-two-columns-dashed-lists-slide` | Convert two org-mode dashed lists to a two-column beamer slide |
 
 ## Status
-Passed 14 tests. Plan to add more advanced functions soon.
+Passed 14 unit tests.
+
 ## Update history
 |Version      | Changes                                                                                                                                  | Date                |
 |:------------|:-----------------------------------------------------------------------------------------------------------------------------------------|:--------------------|
@@ -65,6 +69,7 @@ Passed 14 tests. Plan to add more advanced functions soon.
 - NIH: R01 AI088011
 - NIH: P30 CA225520 (PI: R. Mannel)
 - NIH: P20 GM103640 and P30 GM145423 (PI: A. West)
+
 
 
 

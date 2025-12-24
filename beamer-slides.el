@@ -87,6 +87,33 @@
       (delete-region (region-beginning) (region-end))
       (insert beamer-slide))))
 
+; Old version that does not prompt for figure directory name.
+; (defun beamer-slides-wrap-image-prefix ()
+;   "Wrap the image filename prefix in the current region with a beamer figure slide."
+;   (interactive)
+;   (if (not (region-active-p))
+;       (message "Please select a region containing an image file prefix first")
+;     (let* ((image-prefix (buffer-substring (region-beginning) (region-end)))
+;            (slide-title (read-string "Slide title: "))
+;            (beamer-slide (concat "\\section{" slide-title "}\n"
+;                                 "\\begin{frame}\n"
+;                                 "\\frametitle{" slide-title "}\n"
+;                                 "\\begin{center}\n"
+;                                 "    \\includegraphics[width=0.99\\textwidth, angle=0]{./Figures/" image-prefix "}\n"
+;                                 "\\end{center}\n"
+;                                 "\\end{frame}\n"
+;                                 "\\note{\n"
+;                                 "  Add speaker notes here for " slide-title "...\n"
+;                                 "  }\n")))
+;
+;       ;; Replace the region with the new beamer slide
+;       (delete-region (region-beginning) (region-end))
+;       (insert beamer-slide)
+;
+;       ;; Move cursor to the note section for immediate editing
+;       (search-backward "Add speaker notes here")
+;       (beginning-of-line))))
+
 (defun beamer-slides-wrap-image-prefix ()
   "Wrap the image filename prefix in the current region with a beamer figure slide."
   (interactive)
@@ -94,17 +121,17 @@
       (message "Please select a region containing an image file prefix first")
     (let* ((image-prefix (buffer-substring (region-beginning) (region-end)))
            (slide-title (read-string "Slide title: "))
+           (figures-dir (read-string "Figures directory name (default: Figures): " nil nil "Figures"))
            (beamer-slide (concat "\\section{" slide-title "}\n"
                                 "\\begin{frame}\n"
                                 "\\frametitle{" slide-title "}\n"
                                 "\\begin{center}\n"
-                                "    \\includegraphics[width=0.99\\textwidth, angle=0]{./Figures/" image-prefix "}\n"
+                                "    \\includegraphics[width=0.99\\textwidth, angle=0]{./" figures-dir "/" image-prefix "}\n"
                                 "\\end{center}\n"
                                 "\\end{frame}\n"
                                 "\\note{\n"
                                 "  Add speaker notes here for " slide-title "...\n"
                                 "  }\n")))
-
       ;; Replace the region with the new beamer slide
       (delete-region (region-beginning) (region-end))
       (insert beamer-slide)
@@ -112,6 +139,7 @@
       ;; Move cursor to the note section for immediate editing
       (search-backward "Add speaker notes here")
       (beginning-of-line))))
+
 
 (defun beamer-slides-org-table-to-beamer-slide ()
   "Convert an org-mode table to a LaTeX table in a beamer slide."
@@ -376,38 +404,104 @@ y_{i} & \\sim \\operatorname{Normal}\\left(\\mu_{i}, \\sigma\\right) \\\\
           (let ((item-content (match-string 1 line)))
             (setq right-items (concat right-items "            \\item " item-content "\n")))))
       
-      ;; Create the slide template
-      (setq beamer-slide (concat "\\section{" slide-title "}\n"
-                               "\\begin{frame}\n"
-                               "\\frametitle{" slide-title "}\n"
-                               "\\begin{large}\n"
-                               "\\begin{columns}\n"
-                               "    \\begin{column}{0.45\\textwidth}\n"
-                               "        \\begin{itemize}[font=$\\bullet$\\scshape\\bfseries]\n"
-                               left-items
-                               "        \\end{itemize}\n"
-                               "    \\end{column}\n"
-                               "    \\begin{column}{0.45\\textwidth}\n"
-                               "        \\begin{itemize}[font=$\\bullet$\\scshape\\bfseries]\n"
-                               right-items
-                               "        \\end{itemize}\n"
-                               "    \\end{column}\n"
-                               "    \\end{columns}\n"
-                               "\\end{large}\n"
-                               "    \\vspace{2em}\n"
-                               "  " (or footnote-text "") "\n"
-                               "\\end{frame}\n"
-                               "\\note{\n"
-                               "  Add speaker notes here for " slide-title "...\n"
-                               "  }\n"))
-      
-      ;; Replace the region with the new beamer slide
-      (delete-region (region-beginning) (region-end))
-      (insert beamer-slide)
-      
-      ;; Move cursor to the note section
-      (search-backward "Add speaker notes here")
-      (beginning-of-line))))
+
+;; Extract an outline of the talk uses the frametiles as headlines in a orgmode file
+;; Create the slide template
+(setq beamer-slide (concat "\\section{" slide-title "}\n"
+                         "\\begin{frame}\n"
+                         "\\frametitle{" slide-title "}\n"
+                         "\\begin{large}\n"
+                         "\\begin{columns}\n"
+                         "    \\begin{column}{0.45\\textwidth}\n"
+                         "\\textbf{Left column subheadline}\n"
+                         "        \\begin{itemize}[font=$\\bullet$\\scshape\\bfseries]\n"
+                         left-items
+                         "        \\end{itemize}\n"
+                         "    \\end{column}\n"
+                         "    \\begin{column}{0.45\\textwidth}\n"
+                         "\\textbf{Right column subheadline}\n"
+                         "        \\begin{itemize}[font=$\\bullet$\\scshape\\bfseries]\n"
+                         right-items
+                         "        \\end{itemize}\n"
+                         "    \\end{column}\n"
+                         "    \\end{columns}\n"
+                         "\\end{large}\n"
+                         "    \\vspace{2em}\n"
+                         "  " (or footnote-text "") "\n"
+                         "\\end{frame}\n"
+                         "\\note{\n"
+                         "  Add speaker notes here for " slide-title "...\n"
+                         "  }\n"))
+
+;; Replace the region with the new beamer slide
+(delete-region (region-beginning) (region-end))
+(insert beamer-slide)
+
+;; Move cursor to the note section
+(search-backward "Add speaker notes here")
+(beginning-of-line))))
+
+(defun beamer-slides-frametitle-to-headline (beamer-file output-file)
+  "Extract frame titles from BEAMER-FILE and write them as org headlines to OUTPUT-FILE.
+This function finds all \\frametitle{} entries that are not commented out
+and creates an org-mode file with these titles as top-level headlines."
+  (interactive
+   (list
+    (read-file-name "Beamer LaTeX file: " nil nil t)
+    (read-file-name "Output org file: " nil "frametitles.org")))
+
+  (let ((titles '()))
+    ;; Read the beamer file and extract frame titles
+    (with-temp-buffer
+      (insert-file-contents beamer-file)
+      (goto-char (point-min))
+
+      ;; Find all \frametitle{} entries that are not commented out
+      (while (re-search-forward "^[^%]*\\\\frametitle{\\([^}]+\\)}" nil t)
+        (let ((title (match-string 1)))
+          ;; Clean up LaTeX commands and special characters
+          (setq title (replace-regexp-in-string "\\\\\"\\(o\\)" "ö" title))
+          (setq title (replace-regexp-in-string "\\\\textbf{\\([^}]+\\)}" "\\1" title))
+          (setq title (replace-regexp-in-string "\\\\emph{\\([^}]+\\)}" "\\1" title))
+          (setq title (replace-regexp-in-string "\\\\\\(.*?\\)" "" title))
+          (push title titles))))
+
+    ;; Reverse the list to maintain original order
+    (setq titles (nreverse titles))
+
+    ;; Write the org-mode file
+    (with-temp-file output-file
+      (insert "#+TITLE: Frame Titles from " (file-name-nondirectory beamer-file) "\n")
+      (insert "#+AUTHOR: Blaine Mooers\n")
+      (insert "#+DATE: " (format-time-string "%Y-%m-%d") "\n")
+      (insert "#+OPTIONS: toc:nil num:nil\n")
+      (insert "#+STARTUP: overview\n")
+      (insert "#+LaTeX_HEADER: \\usepackage[margin=0.5in]{geometry}\n")
+      (insert "\n")
+
+      ;; Insert each title as a top-level headline
+      (dolist (title titles)
+        (insert "* " title "\n")))
+
+    (message "Extracted %d frame titles to %s" (length titles) output-file)
+
+    ;; Open the output file if called interactively
+    (when (called-interactively-p 'interactive)
+      (find-file output-file))))
+
+(defun beamer-slides-frametitle-to-headline-current-buffer ()
+  "Extract frame titles from current beamer buffer to org headlines.
+Prompts for output file name. Useful when already viewing a beamer file."
+  (interactive)
+  (unless (buffer-file-name)
+    (error "Current buffer is not visiting a file"))
+  (let ((output-file (read-file-name "Output org file: " 
+                                     (file-name-directory (buffer-file-name))
+                                     (concat (file-name-sans-extension 
+                                             (file-name-nondirectory (buffer-file-name)))
+                                            "_titles.org"))))
+    (beamer-slides-frametitle-to-headline (buffer-file-name) output-file)))
+
 
 (provide 'beamer-slides)
 ;;; beamer-slides.el ends here
